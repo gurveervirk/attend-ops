@@ -36,7 +36,7 @@ The application follows a modern client-server architecture:
 
 1. **Clone the repository**
    ```
-   git clone https://github.com/gurveervirk/attend-dash-lovable-front.git
+   git clone https://github.com/gurveervirk/attend-ops.git
    cd attend-dash-lovable-front
    ```
 

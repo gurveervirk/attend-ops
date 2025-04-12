@@ -1,5 +1,4 @@
-
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const API_URL = 'https://api.example.com'; // Replace with your actual API URL
 

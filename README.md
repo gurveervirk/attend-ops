@@ -1,73 +1,62 @@
-# Welcome to your Lovable project
+# AI-enhanced Attendance Operations Platform
 
-## Project info
+A comprehensive solution for managing employee attendance, team allocation, and administrative operations with AI-powered insights and decision support.
 
-**URL**: https://lovable.dev/projects/fa83a2a3-1504-4a95-ab31-9aa0f55049d8
+## Overview
 
-## How can I edit this code?
+The AI-enhanced Attendance Operations Platform is designed to streamline attendance management processes through an intuitive interface and intelligent backend services. The platform integrates modern frontend technologies with a robust backend API, providing features like real-time attendance tracking, team management, analytical reporting, and AI-assisted administrative support.
 
-There are several ways of editing your application.
+## Key Features
 
-**Use Lovable**
+- **Secure Authentication**: OAuth and JWT-based authentication system
+- **Employee Management**: Add, update, and track employee details and attendance records
+- **Team Operations**: Create and manage teams with advanced allocation features
+- **AI Assistant**: Natural language query system for administrators to gain insights and automate tasks
+- **Analytics Dashboard**: Visual representations of attendance data and team performance
+- **Role-Based Access Control**: Different permission levels for employees and administrators
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fa83a2a3-1504-4a95-ab31-9aa0f55049d8) and start prompting.
+## Architecture
 
-Changes made via Lovable will be committed automatically to this repo.
+The application follows a modern client-server architecture:
 
-**Use your preferred IDE**
+- **Frontend**: React-based SPA with Tailwind CSS for styling and state management
+- **Backend**: FastAPI-powered Python service with modular design and OAuth/JWT security
+- **Database**: Optimized schema design with proper indexing for high-performance queries
+- **AI Integration**: Advanced agent workflow system for processing administrative queries
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- Node.js 16+ and npm/bun for frontend
+- Python 3.10+ for backend
+- Database (refer to backend README for configuration)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Setup Instructions
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. **Clone the repository**
+   ```
+   git clone https://github.com/gurveervirk/attend-dash-lovable-front.git
+   cd attend-dash-lovable-front
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. **Backend Setup**
+   ```
+   cd backend
+   pip install -r requirements.txt
+   uvicorn app:app
+   ```
+   See backend/README.md for detailed configuration options.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+3. **Frontend Setup**
+   ```
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   See frontend/README.md for more information.
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/fa83a2a3-1504-4a95-ab31-9aa0f55049d8) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+4. **Access the Application**
+   - Frontend development server: http://localhost:8080
+   - Backend API: http://localhost:8000
+   - API documentation: http://localhost:8000/docs

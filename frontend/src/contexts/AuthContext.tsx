@@ -54,16 +54,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      const { access_token, user } = response.data;
+      const { access_token, role } = response.data;
       
       localStorage.setItem('token', access_token);
-      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('userRole', role);
       
       setIsAuthenticated(true);
-      setUserRole(user.role as UserRole);
+      setUserRole(role as UserRole);
       
       // Redirect based on role
-      if (user.role === 'ADMIN') {
+      if (role === 'ADMIN') {
         navigate('/admin/dashboard');
       } else {
         navigate('/dashboard');

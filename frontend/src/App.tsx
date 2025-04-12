@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,9 @@ import EmployeeAttendance from "./pages/employee/Attendance";
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminChat from "./pages/admin/Chat";
+import AdminEmployees from "./pages/admin/Employees";
+import AdminTeams from "./pages/admin/Teams";
+import AdminAttendance from "./pages/admin/Attendance";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,30 @@ const App = () => (
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AppLayout>
                   <AdminDashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/employees" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AppLayout>
+                  <AdminEmployees />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/teams" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AppLayout>
+                  <AdminTeams />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/attendance" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AppLayout>
+                  <AdminAttendance />
                 </AppLayout>
               </ProtectedRoute>
             } />

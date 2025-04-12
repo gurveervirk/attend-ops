@@ -25,12 +25,6 @@ const navItems: NavItem[] = [
     role: 'EMPLOYEE',
   },
   {
-    title: 'My Profile',
-    href: '/profile',
-    icon: UserCircle,
-    role: 'EMPLOYEE',
-  },
-  {
     title: 'My Attendance',
     href: '/attendance',
     icon: Clock,

@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { attendanceApi, employeeApi } from '@/lib/api';
-import { Loader2, Calendar, Clock, Users, UserCircle } from 'lucide-react';
+import { attendanceApi, employeeApi, teamApi } from '@/lib/api';
+import { Loader2, Calendar, Clock, UserCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -21,11 +20,6 @@ interface Team {
   team_name: string;
 }
 
-interface TeamMember {
-  employee_id: string;
-  name: string;
-}
-
 interface AttendanceRecord {
   record_id: string;
   employee_id: string;
@@ -41,14 +35,13 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [recentAttendance, setRecentAttendance] = useState<AttendanceRecord[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // First get the user's employee data
-        const employeeResponse = await employeeApi.getById('current'); // Assuming endpoint to get current user
+        // Get employee information
+        const employeeResponse = await employeeApi.getById('current');
         
         if (employeeResponse.error || !employeeResponse.data) {
           toast.error('Failed to load your profile');
@@ -60,22 +53,9 @@ const Dashboard = () => {
         
         // Get team information
         if (employeeData.team_id) {
-          const teamResponse = await employeeApi.getById(employeeData.team_id);
+          const teamResponse = await teamApi.getById(employeeData.team_id);
           if (!teamResponse.error && teamResponse.data) {
             setTeam(teamResponse.data);
-          }
-          
-          // Get team members
-          const teamMembersResponse = await employeeApi.getAll();
-          if (!teamMembersResponse.error && teamMembersResponse.data) {
-            const filteredMembers = teamMembersResponse.data
-              .filter((member: Employee) => member.team_id === employeeData.team_id && member.employee_id !== employeeData.employee_id)
-              .map((member: Employee) => ({
-                employee_id: member.employee_id,
-                name: member.name
-              }));
-            
-            setTeamMembers(filteredMembers);
           }
         }
         
@@ -134,9 +114,6 @@ const Dashboard = () => {
                 <p><span className="font-medium">Email:</span> {employee.email}</p>
                 <p><span className="font-medium">Team:</span> {team?.team_name || 'Loading...'}</p>
                 <p><span className="font-medium">Role:</span> {employee.role}</p>
-                <Button variant="outline" size="sm" className="mt-2">
-                  View Full Profile
-                </Button>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -170,63 +147,13 @@ const Dashboard = () => {
                     </span>
                   </div>
                 ))}
-                <Button variant="outline" size="sm" className="w-full mt-2">
-                  View All Records
-                </Button>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">No recent attendance records</p>
             )}
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Team Members
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {teamMembers.length > 0 ? (
-              <div className="space-y-2">
-                {teamMembers.map((member) => (
-                  <div key={member.employee_id} className="text-sm py-1 border-b last:border-0">
-                    {member.name}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No team members found</p>
-            )}
-          </CardContent>
-        </Card>
       </div>
-
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Today's Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Clock className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">
-                  {format(new Date(), 'EEEE, MMMM d, yyyy')}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {/* Dynamically get today's status from API */}
-                  Your status today: <span className="font-medium text-green-600">Present</span>
-                </p>
-              </div>
-            </div>
-            <Button disabled={userRole !== 'ADMIN'}>
-              View Today's Schedule
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

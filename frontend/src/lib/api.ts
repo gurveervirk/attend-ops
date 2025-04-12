@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 
-const API_URL = 'https://api.example.com'; // Replace with your actual API URL
+const API_URL = 'http://localhost:8000';
 
 interface ApiResponse<T> {
   data?: T;
@@ -8,12 +8,12 @@ interface ApiResponse<T> {
 }
 
 export async function fetchWithAuth<T>(
-  endpoint: string, 
+  endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
     const token = localStorage.getItem('token');
-    
+
     if (!token && !endpoint.includes('/token')) {
       // Redirect to login if no token is found
       window.location.href = '/login';
@@ -56,17 +56,19 @@ export async function fetchWithAuth<T>(
 // Auth APIs
 export const authApi = {
   login: async (email: string, password: string) => {
-    const formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
-    
-    return fetchWithAuth<{ access_token: string; token_type: string; user: { role: string } }>('/token', {
+    const params = new URLSearchParams();
+    params.append('username', email);
+    params.append('password', password);
+
+    return fetchWithAuth<{ access_token: string; token_type: string; role: string }>('/token', {
       method: 'POST',
-      body: formData,
-      headers: {} // Don't set Content-Type for FormData
+      body: params.toString(),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     });
   },
-  
+
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
@@ -111,9 +113,9 @@ export const teamApi = {
 export const attendanceApi = {
   getAll: () => fetchWithAuth<any[]>('/attendance/'),
   getById: (id: string) => fetchWithAuth<any>(`/attendance/${id}`),
-  getByEmployeeId: (employeeId: string) => 
+  getByEmployeeId: (employeeId: string) =>
     fetchWithAuth<any[]>(`/attendance/employee/${employeeId}`),
-  getByTeamId: (teamId: string) => 
+  getByTeamId: (teamId: string) =>
     fetchWithAuth<any[]>(`/attendance/team/${teamId}`),
   create: (data: any) => fetchWithAuth('/attendance/', {
     method: 'POST',
@@ -131,7 +133,7 @@ export const attendanceApi = {
 
 // AI Chat API
 export const chatApi = {
-  sendMessage: (message: string) => 
+  sendMessage: (message: string) =>
     fetchWithAuth<{ response: string }>('/chat/', {
       method: 'POST',
       body: JSON.stringify({ message })

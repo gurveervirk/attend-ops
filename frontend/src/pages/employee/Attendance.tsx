@@ -24,11 +24,10 @@ interface AttendanceRecord {
 }
 
 const statusColors = {
-  PRESENT: 'bg-green-100 text-green-800',
-  ABSENT: 'bg-red-100 text-red-800',
-  LATE: 'bg-amber-100 text-amber-800',
-  LEAVE: 'bg-blue-100 text-blue-800',
-  HOLIDAY: 'bg-purple-100 text-purple-800',
+  Present: 'bg-green-100 text-green-800',
+  Absent: 'bg-red-100 text-red-800',
+  Leave: 'bg-blue-100 text-blue-800',
+  WFH: 'bg-purple-100 text-purple-800',
 };
 
 const AttendancePage = () => {
@@ -158,20 +157,17 @@ const AttendancePage = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setStatusFilter('PRESENT')}>
+                  <DropdownMenuItem onClick={() => setStatusFilter('Present')}>
                     Present
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('ABSENT')}>
+                  <DropdownMenuItem onClick={() => setStatusFilter('Absent')}>
                     Absent
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('LATE')}>
-                    Late
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('LEAVE')}>
+                  <DropdownMenuItem onClick={() => setStatusFilter('Leave')}>
                     Leave
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter('HOLIDAY')}>
-                    Holiday
+                  <DropdownMenuItem onClick={() => setStatusFilter('WFH')}>
+                    WFH
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

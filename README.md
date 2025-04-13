@@ -31,32 +31,61 @@ The application follows a modern client-server architecture:
 - Node.js 16+ and npm/bun for frontend
 - Python 3.10+ for backend
 - Database (refer to backend README for configuration)
+- Docker and Docker Compose (optional, for containerized setup)
 
 ### Setup Instructions
 
 1. **Clone the repository**
+
    ```
    git clone https://github.com/gurveervirk/attend-dash-lovable-front.git
    cd attend-dash-lovable-front
    ```
 
 2. **Backend Setup**
+
    ```
    cd backend
    pip install -r requirements.txt
    uvicorn app:app
    ```
+
    See backend/README.md for detailed configuration options.
 
 3. **Frontend Setup**
+
    ```
    cd frontend
    npm install
    npm run dev
    ```
+
    See frontend/README.md for more information.
 
 4. **Access the Application**
    - Frontend development server: http://localhost:8080
+   - Backend API: http://localhost:8000
+   - API documentation: http://localhost:8000/docs
+
+### Alternative: Running with Docker Compose
+
+You can also run the entire application stack using Docker Compose:
+
+1. **Create a .env file** in the project root with the following variables:
+
+   ```
+   DB_PASSWORD=your_secure_password
+   SECRET_KEY=your_secret_key
+   GOOGLE_API_KEY=your_google_api_key
+   ```
+
+2. **Run Docker Compose**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the containerized application**
+   - Frontend: http://localhost:8080
    - Backend API: http://localhost:8000
    - API documentation: http://localhost:8000/docs

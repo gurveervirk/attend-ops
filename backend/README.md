@@ -50,6 +50,7 @@ The API is organized into the following modules:
 - `GET /attendance/employee/{employee_id}` - Get attendance records for specific employee
 - `GET /attendance/team/{team_id}` - Get attendance records for all employees in a team
 - `GET /summarize_attendance/` - Get attendance summary statistics for the last day and week
+- `GET /trends/` - Get aggregated attendance trends by team or employee with status counts and percentages
 
 ### AI Assistant (Admin only)
 
@@ -110,6 +111,18 @@ The API uses the following data models:
 ```json
 {
   "message": "Show me departments with attendance issues last month"
+}
+```
+
+### TrendResult
+
+```json
+{
+  "team_id": 2,
+  "team_name": "Engineering",
+  "status": "Present",
+  "count": 45,
+  "percentage": 90.0
 }
 ```
 

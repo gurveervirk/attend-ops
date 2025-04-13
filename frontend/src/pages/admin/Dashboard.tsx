@@ -3,12 +3,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { attendanceApi, employeeApi, teamApi } from '@/lib/api';
 import { Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { AttendanceTrendsChart } from '@/components/AttendanceTrendsChart';
 
 interface DashboardStats {
   totalEmployees: number;
   totalTeams: number;
   yesterdaySummary: string;
   lastWeekSummary: string;
+}
+
+interface Employee {
+  employee_id: number;
+  name: string;
+}
+
+interface Team {
+  team_id: number;
+  team_name: string;
 }
 
 const AdminDashboard = () => {
@@ -19,6 +30,8 @@ const AdminDashboard = () => {
     yesterdaySummary: '',
     lastWeekSummary: ''
   });
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -33,15 +46,19 @@ const AdminDashboard = () => {
         
         const summary = summaryResponse.data;
         
-        // Get employees count
+        // Get employees
         const employeesResponse = await employeeApi.getAll();
-        const totalEmployees = !employeesResponse.error && employeesResponse.data ? 
-          employeesResponse.data.length : 0;
+        const employeesList = !employeesResponse.error && employeesResponse.data ? 
+          employeesResponse.data : [];
+        const totalEmployees = employeesList.length;
+        setEmployees(employeesList);
         
-        // Get teams count
+        // Get teams
         const teamsResponse = await teamApi.getAll();
-        const totalTeams = !teamsResponse.error && teamsResponse.data ? 
-          teamsResponse.data.length : 0;
+        const teamsList = !teamsResponse.error && teamsResponse.data ?
+          teamsResponse.data : [];
+        const totalTeams = teamsList.length;
+        setTeams(teamsList);
         
         setStats({
           totalEmployees,
@@ -69,7 +86,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 overflow-auto">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">
@@ -110,6 +127,12 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Attendance Trends Chart */}
+      <AttendanceTrendsChart 
+        employees={employees} 
+        teams={teams} 
+      />
 
       <Card>
         <CardHeader>

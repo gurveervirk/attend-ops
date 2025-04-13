@@ -54,3 +54,15 @@ class AttendanceRecordCRUD(BaseModel):
 class AttendanceSummary(BaseModel):
     yesterday_summary: str
     last_week_summary: str
+
+class TrendResult(BaseModel):
+    """Data model for attendance trend results"""
+    team_id: Optional[int] = None
+    team_name: Optional[str] = None
+    employee_id: Optional[int] = None
+    employee_name: Optional[str] = None
+    status: str
+    count: int
+    percentage: float
+    earliest_date: Optional[date] = None
+    latest_date: Optional[date] = None

@@ -12,6 +12,7 @@ The AI-enhanced Attendance Operations Platform is designed to streamline attenda
 - **Employee Management**: Add, update, and track employee details and attendance records
 - **Team Operations**: Create and manage teams with advanced allocation features
 - **AI Assistant**: Natural language query system for administrators to gain insights and automate tasks
+- **Attendance Trending**: Visualize attendance trends in time ranges and by employee/team
 - **Analytics Dashboard**: Visual representations of attendance data and team performance
 - **Role-Based Access Control**: Different permission levels for employees and administrators
 

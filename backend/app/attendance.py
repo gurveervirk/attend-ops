@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Union
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Union, Optional
 from datetime import datetime, timedelta
 from tenacity import retry, stop_after_attempt, retry_if_exception, wait_incrementing, before_sleep_log, after_log
 from .db import (
@@ -10,8 +10,9 @@ from .db import (
     get_all_attendance_records,
     get_attendance_records_by_employee,
     get_attendance_records_by_team,
+    get_attendance_trends,
 )
-from .models import AttendanceRecord, Employee, AttendanceRecordCRUD, AttendanceSummary
+from .models import AttendanceRecord, Employee, AttendanceRecordCRUD, AttendanceSummary, TrendResult
 from .auth import get_current_active_user
 from .helper import is_db_error, summarize_attendance
 import logging
@@ -27,7 +28,7 @@ router = APIRouter()
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def create_attendance_endpoint(attendance_record: AttendanceRecordCRUD, current_user: Employee = Depends(get_current_active_user)):
@@ -81,7 +82,7 @@ async def read_attendance_endpoint(record_id: int, current_user: Employee = Depe
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def update_attendance_endpoint(record_id: int, attendance_record: AttendanceRecordCRUD, current_user: Employee = Depends(get_current_active_user)):
@@ -108,7 +109,7 @@ async def update_attendance_endpoint(record_id: int, attendance_record: Attendan
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def delete_attendance_endpoint(record_id: int, current_user: Employee = Depends(get_current_active_user)):
@@ -126,7 +127,7 @@ async def delete_attendance_endpoint(record_id: int, current_user: Employee = De
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def read_all_attendance_endpoint(current_user: Employee = Depends(get_current_active_user)):
@@ -165,7 +166,7 @@ async def _read_attendance_by_employee(employee_id: Union[int, str], current_use
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def read_attendance_by_employee_endpoint(employee_id: Union[int, str], current_user: Employee = Depends(get_current_active_user)):
@@ -182,7 +183,7 @@ async def read_attendance_by_employee_endpoint(employee_id: Union[int, str], cur
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def read_attendance_by_team_endpoint(team_id: int, current_user: Employee = Depends(get_current_active_user)):
@@ -199,7 +200,7 @@ async def read_attendance_by_team_endpoint(team_id: int, current_user: Employee 
     retry=retry_if_exception(is_db_error), 
     stop=stop_after_attempt(3), 
     wait=wait_incrementing(start=5, increment=5), 
-    before_sleep=before_sleep_log(logger, logging.INFO), 
+before_sleep=    before_sleep_log(logger, logging.INFO), 
     after=after_log(logger, logging.INFO)
 )
 async def summarize_attendance_logs(current_user: Employee = Depends(get_current_active_user)):
@@ -235,3 +236,67 @@ async def summarize_attendance_logs(current_user: Employee = Depends(get_current
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to summarize attendance logs: {e}")
+
+@router.get("/trends/", response_model=List[TrendResult])
+@retry(
+    retry=retry_if_exception(is_db_error), 
+    stop=stop_after_attempt(3), 
+    wait=wait_incrementing(start=5, increment=5), 
+    before_sleep=before_sleep_log(logger, logging.INFO), 
+    after=after_log(logger, logging.INFO)
+)
+async def get_attendance_trends_endpoint(
+    start_date: str = Query(..., description="Start date in YYYY-MM-DD format"),
+    end_date: str = Query(..., description="End date in YYYY-MM-DD format"),
+    group_by: str = Query("team", description="Group results by 'team', 'employee', or 'status'"),
+    employee_id: Optional[int] = Query(None, description="Filter by specific employee ID"),
+    team_id: Optional[int] = Query(None, description="Filter by specific team ID"),
+    status: Optional[str] = Query(None, description="Filter by specific attendance status (Present, Absent, WFH, Leave)"),
+    current_user: Employee = Depends(get_current_active_user)
+):
+    """
+    Get aggregated attendance trends within a date range.
+    
+    This endpoint provides insights into attendance patterns with flexible aggregation options:
+    - Group by team, employee, or status
+    - Filter by specific employee, team, or status
+    - All results include counts and percentages
+    
+    Examples:
+    - Get attendance distribution by team: /trends/?start_date=2025-01-01&end_date=2025-04-01&group_by=team
+    - Get status breakdown for a specific employee: /trends/?start_date=2025-01-01&end_date=2025-04-01&group_by=employee&employee_id=42
+    - Get overall status distribution: /trends/?start_date=2025-01-01&end_date=2025-04-01&group_by=status
+    - Get WFH trends across all employees: /trends/?start_date=2025-01-01&end_date=2025-04-01&status=WFH&group_by=employee
+    """
+    try:
+        # Validate date formats
+        try:
+            datetime.strptime(start_date, '%Y-%m-%d')
+            datetime.strptime(end_date, '%Y-%m-%d')
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+            
+        # Validate group_by parameter
+        if group_by not in ["team", "employee", "status"]:
+            raise HTTPException(status_code=400, detail="group_by must be 'team', 'employee', or 'status'")
+        
+        # Validate status parameter if provided
+        if status and status not in ["Present", "Absent", "WFH", "Leave"]:
+            raise HTTPException(status_code=400, detail="status must be 'Present', 'Absent', 'WFH', or 'Leave'")
+            
+        # Only admins can access this endpoint
+        if current_user.role != "ADMIN":
+            raise HTTPException(status_code=403, detail="Unauthorized")
+            
+        trends = get_attendance_trends(
+            start_date=start_date,
+            end_date=end_date,
+            group_by=group_by,
+            employee_id=employee_id,
+            team_id=team_id,
+            status=status,
+        )
+        
+        return trends
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve attendance trends: {e}")

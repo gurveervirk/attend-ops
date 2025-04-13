@@ -53,6 +53,28 @@ export async function fetchWithAuth<T>(
   }
 }
 
+// Add these types for the trends endpoint
+export interface TrendResult {
+  team_id?: number;
+  team_name?: string;
+  employee_id?: number;
+  employee_name?: string;
+  status: string;
+  count: number;
+  percentage: number;
+  earliest_date?: string;
+  latest_date?: string;
+}
+
+export interface TrendParams {
+  start_date: string;
+  end_date: string;
+  group_by?: 'team' | 'employee' | 'status';
+  employee_id?: number;
+  team_id?: number;
+  status?: string;
+}
+
 // Auth APIs
 export const authApi = {
   login: async (email: string, password: string) => {
@@ -128,7 +150,41 @@ export const attendanceApi = {
   delete: (id: string) => fetchWithAuth(`/attendance/${id}`, {
     method: 'DELETE'
   }),
-  getSummary: () => fetchWithAuth<any>('/summarize_attendance/')
+  getSummary: () => fetchWithAuth<any>('/summarize_attendance/'),
+
+  // Add the trends endpoint
+  getTrends: async (params: TrendParams) => {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append('start_date', params.start_date);
+      queryParams.append('end_date', params.end_date);
+
+      if (params.group_by) {
+        queryParams.append('group_by', params.group_by);
+      }
+
+      if (params.employee_id) {
+        queryParams.append('employee_id', params.employee_id.toString());
+      }
+
+      if (params.team_id) {
+        queryParams.append('team_id', params.team_id.toString());
+      }
+
+      if (params.status) {
+        queryParams.append('status', params.status);
+      }
+
+      const response = await fetchWithAuth<TrendResult[]>(`/trends/?${queryParams.toString()}`, {
+        method: 'GET',
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Error fetching trends:', error);
+      return { error: 'Failed to fetch trends data', data: null };
+    }
+  }
 };
 
 // AI Chat API

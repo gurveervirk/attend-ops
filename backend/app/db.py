@@ -1067,6 +1067,152 @@ def get_attendance_records_by_team(team_id: int) -> List[Dict[str, Any]]:
         if conn:
             conn.close()
 
+def get_attendance_trends(
+    start_date: str,
+    end_date: str,
+    group_by: str = "team",
+    employee_id: Optional[int] = None,
+    team_id: Optional[int] = None,
+    status: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Retrieves attendance trends data aggregated by team or employee within a date range,
+    with optional filtering by specific employee, team, or status.
+    
+    Args:
+        start_date (str): Start date in YYYY-MM-DD format
+        end_date (str): End date in YYYY-MM-DD format
+        group_by (str): Group results by 'team' or 'employee'
+        employee_id (Optional[int]): Filter by specific employee ID
+        team_id (Optional[int]): Filter by specific team ID
+        status (Optional[str]): Filter by specific attendance status
+        limit (int, optional): Limit the number of results
+        
+    Returns:
+        List of dictionaries containing the aggregated attendance data
+    """
+    conn = None
+    # Convert string dates to date objects
+    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+    try:
+        conn = psycopg2.connect(
+            dbname=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port
+        )
+        
+        params = [start_date, end_date]
+        where_clauses = ["ar.attendance_date BETWEEN %s AND %s"]
+        
+        # Add filters if provided
+        if employee_id:
+            where_clauses.append("e.employee_id = %s")
+            params.append(employee_id)
+        
+        if team_id:
+            where_clauses.append("e.team_id = %s")
+            params.append(team_id)
+            
+        if status:
+            where_clauses.append("ar.status = %s")
+            params.append(status)
+        
+        where_clause = " AND ".join(where_clauses)
+        
+        if group_by == "team":
+            query = f"""
+                SELECT 
+                    t.team_id,
+                    t.team_name,
+                    ar.status,
+                    COUNT(ar.record_id) as count,
+                    COUNT(ar.record_id) * 100.0 / 
+                        NULLIF(SUM(COUNT(ar.record_id)) OVER (PARTITION BY t.team_id), 0) as percentage,
+                    MIN(ar.attendance_date) as earliest_date,
+                    MAX(ar.attendance_date) as latest_date
+                FROM attendance_records ar
+                JOIN employees e ON ar.employee_id = e.employee_id
+                JOIN teams t ON e.team_id = t.team_id
+                WHERE {where_clause}
+                GROUP BY t.team_id, t.team_name, ar.status
+                ORDER BY t.team_name, ar.status
+            """
+        elif group_by == "status":
+            query = f"""
+                SELECT 
+                    ar.status,
+                    COUNT(ar.record_id) as count,
+                    COUNT(ar.record_id) * 100.0 / 
+                        NULLIF(SUM(COUNT(ar.record_id)) OVER (), 0) as percentage,
+                    MIN(ar.attendance_date) as earliest_date,
+                    MAX(ar.attendance_date) as latest_date
+                FROM attendance_records ar
+                JOIN employees e ON ar.employee_id = e.employee_id
+                LEFT JOIN teams t ON e.team_id = t.team_id
+                WHERE {where_clause}
+                GROUP BY ar.status
+                ORDER BY ar.status
+            """
+        else:  # group_by == "employee"
+            query = f"""
+                SELECT 
+                    e.employee_id,
+                    e.name as employee_name,
+                    ar.status,
+                    COUNT(ar.record_id) as count,
+                    COUNT(ar.record_id) * 100.0 / 
+                        NULLIF(SUM(COUNT(ar.record_id)) OVER (PARTITION BY e.employee_id), 0) as percentage,
+                    MIN(ar.attendance_date) as earliest_date,
+                    MAX(ar.attendance_date) as latest_date
+                FROM attendance_records ar
+                JOIN employees e ON ar.employee_id = e.employee_id
+                WHERE {where_clause}
+                GROUP BY e.employee_id, e.name, ar.status
+                ORDER BY e.name, ar.status
+            """
+            
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            results = cur.fetchall()
+            
+            if group_by == "team":
+                return [{
+                    'team_id': result[0],
+                    'team_name': result[1],
+                    'status': result[2],
+                    'count': result[3],
+                    'percentage': float(result[4]) if result[4] is not None else 0.0,
+                    'earliest_date': result[5],
+                    'latest_date': result[6]
+                } for result in results]
+            elif group_by == "status":
+                return [{
+                    'status': result[0],
+                    'count': result[1],
+                    'percentage': float(result[2]) if result[2] is not None else 0.0,
+                    'earliest_date': result[3],
+                    'latest_date': result[4]
+                } for result in results]
+            else:  # group_by == "employee"
+                return [{
+                    'employee_id': result[0],
+                    'employee_name': result[1],
+                    'status': result[2],
+                    'count': result[3],
+                    'percentage': float(result[4]) if result[4] is not None else 0.0,
+                    'earliest_date': result[5],
+                    'latest_date': result[6]
+                } for result in results]
+    except psycopg2.Error as e:
+        logging.error(f"Error retrieving attendance trends: {e}")
+        return []
+    finally:
+        if conn:
+            conn.close()
+
 if __name__ == "__main__":
     # Basic check to ensure credentials were loaded
     if not all([db_name, db_user, db_password, db_host, db_port]):

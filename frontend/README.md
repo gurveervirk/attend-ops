@@ -25,6 +25,7 @@ The application was initially scaffolded using [lovable.dev](https://lovable.dev
 ### Dashboard
 - **Overview Cards**: Quick stats showing attendance metrics and team information
 - **Recent Activity**: Timeline of recent attendance events
+- **Attendance Trends**: Graphical representation of attendance data over time, with appropriate filters and selectors
 
 ### Employee Management
 - **Employee Directory**: Searchable and filterable list of all employees

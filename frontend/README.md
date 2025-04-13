@@ -10,7 +10,6 @@ The frontend application for the AI-enhanced Attendance Operations Platform prov
 - **Tailwind CSS**: Utility-first CSS framework for rapid UI development
 - **ShadcnUI**: Customizable component library built on Tailwind CSS
 - **React Router**: Declarative routing for React applications
-- **Recharts**: Responsive charting library for visualizing attendance data
 - **Bun**: JavaScript runtime and package manager for fast dependency installation
 
 ## Development Approach
